@@ -1,5 +1,14 @@
-fpath+=("$HOME/.zsh/pure")
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+# fpath+=("$HOME/.zsh/pure")
 fpath+=("$HOME/.config/fpath")
+
+source ~/.zsh/powerlevel10k/powerlevel10k.zsh-theme
 
 typeset -ga preexec_functions
 typeset -ga precmd_functions
@@ -13,7 +22,7 @@ autoload -U promptinit; promptinit
 PURE_CMD_MAX_EXEC_TIME=5
 PURE_GIT_UNTRACKED_DIRTY=0
 
-prompt pure
+# prompt pure
 
 export TERM=screen-256color
 
@@ -224,3 +233,6 @@ bindkey "^X^E" edit-command-line
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 source /home/lorx/.config/broot/launcher/bash/br
+
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
