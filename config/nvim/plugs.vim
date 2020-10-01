@@ -25,7 +25,7 @@ call plug#begin('~/.config/nvim/plugged')
 " pip install pylint                               ; python
 " pip install autopep8                             ; python
 " pip install jedi-language-server                 ; python
-Plug 'neoclide/coc.nvim', {'branch': 'release', 'do': { -> coc#util#install() }}
+Plug 'neoclide/coc.nvim', {'branch': 'release', 'do': ':CocUpdateSync'}
 
 Plug 'neovimhaskell/haskell-vim', { 'for': 'haskell' }
 Plug 'donRaphaco/neotex', { 'for': 'tex' }
