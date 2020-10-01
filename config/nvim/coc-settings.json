@@ -1,0 +1,212 @@
+{
+  "python.jediPath": "/home/lorx/.local/lib/python3.8/site-packages",
+  "cSpell.language": "en-GB",
+  "cSpell.enabledLanguageIds": [
+    "vim",
+    "asciidoc",
+    "c",
+    "cpp",
+    "csharp",
+    "css",
+    "git-commit",
+    "go",
+    "handlebars",
+    "haskell",
+    "html",
+    "jade",
+    "java",
+    "javascript",
+    "javascriptreact",
+    //"json",
+    "jsonc",
+    "latex",
+    "less",
+    "mail",
+    "markdown",
+    "php",
+    "plaintext",
+    "python",
+    "pug",
+    "restructuredtext",
+    "rust",
+    "scala",
+    "scss",
+    "text",
+    "typescript",
+    "typescriptreact",
+    "yaml",
+    "yml"
+  ],
+  "coc.preferences.formatOnSaveFiletypes": [
+    "python",
+    "markdown",
+    "html",
+    "sh",
+    "json"
+  ],
+  "languageserver": {
+    "bash": {
+      "command": "bash-language-server",
+      "args": [
+        "start"
+      ],
+      "filetypes": [
+        "sh"
+      ],
+      "ignoredRootPaths": [
+        "~"
+      ]
+    },
+    "dockerfile": {
+      "command": "docker-langserver",
+      "filetypes": [
+        "dockerfile"
+      ],
+      "args": [
+        "--stdio"
+      ]
+    },
+    "haskell": {
+      "command": "hie-wrapper",
+      "args": [
+        "--lsp"
+      ],
+      "rootPatterns": [
+        "stack.yaml",
+        "cabal.config",
+        "package.yaml"
+      ],
+      "filetypes": [
+        "hs",
+        "lhs",
+        "haskell"
+      ],
+      "initializationOptions": {
+        "languageServerHaskell": {
+          "hlintOn": true
+        }
+      }
+    }
+  },
+  "diagnostic-languageserver.filetypes": {
+    // lint `sh` (includes `bash`) files
+    "sh": "shellcheck",
+    "mail": [
+      "proselint",
+      "alex"
+    ],
+    "markdown": [
+      "proselint",
+      "alex"
+    ]
+  },
+  "diagnostic-languageserver.formatFiletypes": {
+    // format `sh` (includes `bash`) files using formatter defined below
+    "sh": "shfmt"
+  },
+  "diagnostic-languageserver.linters": {
+    "shellcheck": {
+      "command": "shellcheck",
+      "debounce": 100,
+      "args": [
+        "-x",
+        "--format",
+        "json",
+        "-"
+      ],
+      "sourceName": "shellcheck",
+      "parseJson": {
+        "line": "line",
+        "column": "column",
+        "endLine": "endLine",
+        "endColumn": "endColumn",
+        "message": "${message} [${code}]",
+        "security": "level"
+      },
+      "securities": {
+        "error": "error",
+        "warning": "warning",
+        "info": "info",
+        "style": "hint"
+      }
+    },
+    "proselint": {
+      "command": "proselint",
+      "isStdout": true,
+      "isStderr": false,
+      "debounce": 100,
+      "args": [
+        "-"
+      ],
+      "offsetLine": 0,
+      "offsetColumn": 0,
+      "sourceName": "proselint",
+      "formatLines": 1,
+      "formatPattern": [
+        "^[^:]+:(\\d+):(\\d+):(\\s)(.*)$",
+        {
+          "line": 1,
+          "column": 2,
+          "security": 3,
+          "message": 4
+        }
+      ],
+      "securities": {
+        " ": "info"
+      }
+    },
+    "alex": {
+      "command": "alexjs",
+      "debounce": 200,
+      "isStderr": true,
+      "args": [
+        "--stdin"
+      ],
+      "offsetLine": 0,
+      "offsetColumn": 0,
+      "sourceName": "alex.js",
+      "formatLines": 1,
+      "formatPattern": [
+        "^\\s*(\\d+):(\\d+)-(\\d+):(\\d+)\\s{2}([a-z]+)\\s{2}(.*?)\\s{2,}([a-z-]+)\\s{2,}([a-z-]+)$",
+        {
+          "line": 1,
+          "column": 2,
+          "endLine": 3,
+          "endColumn": 4,
+          "security": 5,
+          "message": 6
+        }
+      ],
+      "securities": {
+        "warning": "warning",
+        "error": "error"
+      }
+    }
+  },
+  "diagnostic-languageserver.formatters": {
+    // define our formatter so that we can reference it from
+    // `diagnostic-languageserver.formatFiletypes`
+    "shfmt": {
+      "command": "shfmt",
+      // all the below args are entirely optional
+      // primarily listed here to call out that flags which take an
+      // argument (such as `-i <num-spaces>` for specifying indentation)
+      // should be split into two strings, the flag and then the value
+      "args": [
+        "-i",
+        "2",
+        "-bn",
+        "-ci",
+        "-sr"
+      ]
+    }
+  },
+  "cSpell.userWords": [
+    "kubernetes",
+    "postgres",
+    "spec",
+    "subfolders",
+    "templating",
+    "traefik"
+  ]
+}

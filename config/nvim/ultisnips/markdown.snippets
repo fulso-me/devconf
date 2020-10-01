@@ -1,0 +1,48 @@
+priority 0
+#extends c
+
+snippet new "New post" b
+---
+layout: post
+title: "${1:Post title}"
+description: "${2:Post description}"
+categories: [${3:cat}]
+tags: [${4:tag1, tag2}]
+published: yes
+date: 1971-01-01
+
+---
+
+* TOC
+{:toc .toc}
+
+${0}
+endsnippet
+
+snippet code "Code block with language" b
+{% highlight ${1:lang} ${2:linenos} %}
+
+${0}
+
+{% endhighlight %}
+endsnippet
+
+snippet codeinc "Code block with language from external file" b
+{%highlight ${1:lang} ${2:linenos} %}
+
+{% include ${0:posts/folder/file} %}
+
+{%endhighlight%}
+endsnippet
+
+snippet raw "Raw block" b
+{% raw %}
+${0}
+{% endraw %}
+endsnippet
+
+snippet mermaid "Mirmaid block" b
+{% mermaid %}
+${0}
+{% endmermaid %}
+endsnippet
