@@ -14,6 +14,8 @@ history:
 	@echo "  MKDIR Creating ~/.vim-tmp"
 	@mkdir -p $(HOME)/.vim-tmp/backup 2>/dev/null
 	@mkdir -p $(HOME)/.vim-tmp/swap 2>/dev/null
+	@echo "  MKDIR Creating ~/.config"
+	@mkdir -p $(HOME)/.config 2>/dev/null
 
 install-configdir-%: config/%
 	@echo "  LNDIR  $< to ~/.$<"
