@@ -172,11 +172,11 @@ set statusline+=%f "filename
 set statusline+=%1*%y%* "filetype
 set statusline+=%L "total lines
 set statusline+=%= "right align
-set statusline+=%{coc#status()}%{get(b:,'coc_current_function','')}
+silent! set statusline+=%{coc#status()}%{get(b:,'coc_current_function','')}
 set statusline+=%= "right align
-set statusline+=%{ObsessionStatus()}
+silent! set statusline+=%{ObsessionStatus()}
 "set statusline+=[%{LinterStatus()}]
-set statusline+=%{FugitiveStatusline()}
+silent! set statusline+=%{FugitiveStatusline()}
 "}}}
 
 " Remaps {{{
