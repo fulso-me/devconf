@@ -1,16 +1,3 @@
-let g:coc_global_extensions = [
-  \ 'coc-marketplace',
-  \ 'coc-diagnostic',
-  \ 'coc-spell-checker',
-  \ 'coc-vimlsp',
-  \ 'coc-json',
-  \ 'coc-docker',
-  \ 'coc-html',
-  \ 'coc-markdownlint',
-  \ 'coc-python',
-  \ 'coc-yaml',
-  \]
-
 call plug#begin('~/.config/nvim/plugged')
 " coc installs
 " npm install -g vim-language-server               ; viml
@@ -25,7 +12,18 @@ call plug#begin('~/.config/nvim/plugged')
 " pip install pylint                               ; python
 " pip install autopep8                             ; python
 " pip install jedi-language-server                 ; python
-Plug 'neoclide/coc.nvim', {'branch': 'release', 'do': ':CocUpdateSync'}
+Plug 'neoclide/coc.nvim', {'branch': 'release', 'do': ':CocInstall -sync
+  \ coc-marketplace
+  \ coc-diagnostic
+  \ coc-spell-checker
+  \ coc-vimlsp
+  \ coc-json
+  \ coc-docker
+  \ coc-html
+  \ coc-markdownlint
+  \ coc-python
+  \ coc-yaml
+  \'}
 
 Plug 'neovimhaskell/haskell-vim', { 'for': 'haskell' }
 Plug 'donRaphaco/neotex', { 'for': 'tex' }
