@@ -1,0 +1,2 @@
+URL=$(echo "$1" | sed -e 's/www.reddit.com/old.reddit.com/')
+wget --no-cookies --header "Cookie: over18=1" -E -H -k -p -r -l1 "$URL"

@@ -62,6 +62,16 @@ alias -s PKGBUILD=$EDITOR
 
 setopt no_complete_aliases
 
+alias arch_update="yay -Syyuu --sudoloop"
+arch_list_pkgs() {yay -Qi | awk '/^Name/{name=$3} /^Installed Size/{print $4$5, name}' | sort -h}
+
+alias docker-clean-dangling="docker rmi $(docker images -f "dangling=true" -q)"
+
+alias rtorrent2="rtorrent -n -o import=/home/lorx/.rtorrent2.rc"
+alias rtorrentbaka="rtorrent -n -o import=/home/lorx/.rtorrentbaka.rc"
+
+burnisodvd() {growisofs -dvd-compat -Z /dev/sr0="$1"}
+
 alias lock="i3lock -f -i $HOME/.lock/win.png -p win"
 
 alias mutt='neomutt'
@@ -233,6 +243,7 @@ bindkey "^X^E" edit-command-line
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 source /home/lorx/.config/broot/launcher/bash/br
+eval "$(direnv hook zsh)"
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh

@@ -1,0 +1,39 @@
+#!/bin/bash
+
+if [ ! -f myvalues.yaml ]
+then
+  echo "No myvalues.yaml ... Copying values.yaml"
+  if [ -f values.yaml ]
+  then
+    cp values.yaml myvalues.yaml
+    exit 0
+  else
+    echo "There is no values.yaml. Exiting..."
+    exit 1
+  fi
+fi
+
+if [ ! -f Chart.yaml ]
+then
+  echo "No Chart.yaml. Exiting..."
+  exit 1
+fi
+
+if [ -z "$1" ]
+then
+  echo "Please specify a release name."
+  exit 1
+fi
+
+if [ -z "$2" ]
+then
+  echo "Please specify a namespace."
+  exit 1
+fi
+
+helm template \
+  --values ./myvalues.yaml \
+  --output-dir ./manifests \
+  --namespace "$2" \
+  "$1" \
+  .

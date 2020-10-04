@@ -1,0 +1,204 @@
+#!/bin/bash
+# Dependencies:
+#   * feh
+#   * xrandr
+#   * rofi (optional)
+#   * xwinwrap (optional; animated)
+#   * xprop (optional; animated)
+#   * mpv (optional; animated)
+#
+# Each folder under ~/.backs is a selectable folder. `.` is ~/.backs itself.
+# Each folder has _hor _ver and _both subfolders for the actual backgrounds, corrisponding to horrizontal, vertical, and shared images respectivly.
+# Each folder may optionally contain a `meta` file. The `meta` file consists of one folder name per line. The folders in the meta file will be added to the list of folders.
+# All arguments to the command are read as folder names.
+# . is assumed if nothing is passed.
+#
+# backgrounds . nature # Uses the default folder and the nature folder.
+# backgrounds -h # help
+# backgrounds -ls # list folder options
+# backgrounds -rofi # pick folders from rofi. shift-enter to select multiple folders
+#
+################################################################################
+# MIT License
+#
+# Copyright (c) 2020 Brian Robertson
+# https://fulsome.ca/blog/2020/08/11/backgrounds
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+################################################################################
+
+# Variables to change
+BASE=".backs"
+BASE_DIR="$HOME/$BASE"
+DELAY=1
+DELAY_UNIT="m"
+VID_DELAY=$((DELAY * 2))
+# end of variables
+
+set_background() {
+  # Please manage all_bgs and has_video seperatly
+  EXT="${1##*.}"
+  if [ "$EXT" == "gif" ] || [ "$EXT" == "webm" ] || [ "$EXT" == "mp4" ] || [ "$EXT" == "mkv" ]; then
+    xwinwrap -fdt -o 1 -ov -g "$GEO" -- "$(realpath "$0")" -wid WID "$1" &
+    has_video=1
+    all_bgs="${all_bgs} \"\""
+  else
+    all_bgs="${all_bgs} \"${1}\""
+  fi
+}
+
+min() {
+  if (($1 < $2)); then
+    echo "$1"
+  else
+    echo "$2"
+  fi
+}
+
+list() {
+  find "$BASE_DIR" -maxdepth 1 -type d \( -name "$BASE" -o ! -name '.*' \) -a \( ! -name '_hor' -a ! -name '_ver' -a ! -name '_both' \) -printf '%f\n'
+}
+
+FOLDERS=("$@")
+
+if [ "$1" == "-h" ]; then
+  printf "%s [FOLDERS]\n" "${0##*/}"
+  printf "\tUse folders as sources.\n\n"
+
+  printf "%s MODE\n" "${0##*/}"
+  printf "\tRun mode instead, where mode is:\n"
+  printf "\t-h This help\n"
+  printf "\t-ls List source options.\n"
+  printf "\t-rofi Read sources from a rofi menu.\n"
+  exit 0
+fi
+
+# Override to our helper script for xwinwrap if we call with "wid"
+# backgrounds "wid" WID VIDEO
+if [ "$1" == "-wid" ]; then
+  # Name the window so picom knows how to treat it
+  xprop -f _NET_WM_NAME 8s -set _NET_WM_NAME "xwinwrap" -id "$2"
+
+  mpv --fullscreen --on-all-workspaces \
+    --no-stop-screensaver \
+    --no-config \
+    --loop-file \
+    --no-osc \
+    --no-osd-bar \
+    --mute \
+    -wid "$2" \
+    --quiet \
+    "$3" --background="#000000"
+  # --no-audio \
+  # --no-input-default-bindings \
+  exit 0
+fi
+
+# List folder options when passed -ls
+if [ "$1" == "-ls" ]; then
+  list
+  exit 0
+fi
+
+# Rofi menu to select from when passed -rofi
+if [ "$1" == "-rofi" ]; then
+  FOLDERS=()
+  # Fix the weird trailing newline and spaces with tr
+  readarray -d ' ' SELECTIONS < <(list | rofi -multi-select -no-auto-select -dmenu | sed -e 's/'"$BASE"'/./' | tr '\n' ' ')
+  for i in "${SELECTIONS[@]}"; do
+    FOLDERS+=("$(echo "$i" | tr -d '[:space:]')")
+  done
+fi
+
+# There can only be one
+pgrep "${0##*/}" | grep -P '^((?!'$$').)*$' | xargs -L 1 kill
+killall xwinwrap
+
+# Make sure we at least have the base dir if nothing else
+if ((!${#FOLDERS[@]})); then
+  FOLDERS=('.')
+  find -L "$BASE_DIR" -maxdepth 1 -type f -name 'default.*' -exec feh --bg-fill {} \;
+  sleep "${DELAY}${DELAY_UNIT}"
+fi
+
+# meta files should be one folder name per line
+for i in "${FOLDERS[@]}"; do
+  echo "$i"
+  if [ -f "$BASE_DIR/$i/meta" ]; then
+    while IFS= read -r line; do
+      FOLDERS+=("$line")
+    done < "$BASE_DIR/$i/meta"
+  fi
+done
+
+HDIRS=()
+VDIRS=()
+for i in "${FOLDERS[@]}"; do
+  HDIRS+=("$BASE_DIR/$i/_hor")
+  HDIRS+=("$BASE_DIR/$i/_both")
+  VDIRS+=("$BASE_DIR/$i/_ver")
+  VDIRS+=("$BASE_DIR/$i/_both")
+done
+
+readarray -t GEOS < <(xrandr --listactivemonitors | grep -oP '\d+\/\d+x\d+\/\d+\+\d+\+\d+' | sed -r -e 's|/[0-9]+||g')
+
+while true; do
+
+  readarray -d '' hpics < <(find -L "${HDIRS[@]}" -maxdepth 1 -type f \( -name '*.jpg' -o -name '*.jpeg' -o -name '*.png' -o -name '*.gif' -o -name '*.webp' -o -name '*.webm' -o -name '*.mp4' -o -name '*.mkv' \) -print0 | shuf -z)
+  readarray -d '' vpics < <(find -L "${VDIRS[@]}" -maxdepth 1 -type f \( -name '*.jpg' -o -name '*.jpeg' -o -name '*.png' -o -name '*.gif' -o -name '*.webp' -o -name '*.webm' -o -name '*.mp4' -o -name '*.mkv' \) -print0 | shuf -z)
+
+  #dunstify --appname="Backgrounds"  --urgency=low --icon="$i" Backgrounds "$(IFS=$'\n'; echo "${FOLDERS[*]}")"
+
+  hpics_len=${#hpics[@]}
+  vpics_len=${#vpics[@]}
+
+  # Only loop as long as your smallest folder before reshuffling
+  pics_len=$(min "$hpics_len" "$vpics_len")
+
+  for ((i = 0; i < pics_len; i++)); do
+    #    convert "$i" -geometry 1920x1080 -gravity center -background black -extent 1920x1080 $HOME/.swap.png
+    hpic="${hpics[$i]}"
+    vpic="${vpics[$i]}"
+
+    killall xwinwrap
+
+    all_bgs="feh --no-fehbg --bg-fill"
+    has_video=0
+
+    for GEO in "${GEOS[@]}"; do
+      WIDTH=$(echo "$GEO" | grep -oP '^\d+')
+      HEIGHT=$(echo "$GEO" | grep -oP 'x\K\d+')
+      if [ "$WIDTH" -gt "$HEIGHT" ]; then
+        set_background "$hpic"
+      else
+        set_background "$vpic"
+      fi
+    done
+
+    eval " $all_bgs"
+    echo "$all_bgs"
+
+    # Don't change as fast if there's an ani playing
+    if ((has_video == 1)); then
+      sleep "${VID_DELAY}${DELAY_UNIT}"
+    else
+      sleep "${DELAY}${DELAY_UNIT}"
+    fi
+  done
+done

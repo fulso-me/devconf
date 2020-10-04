@@ -1,0 +1,24 @@
+#!/bin/bash
+killall backgrounds
+killall xwinwrap
+hsetroot
+
+readarray -t GEOS < <(xrandr -q | grep ' connected' | grep -oP '\d+x\d+\+\d+\+\d+')
+HEIGHT="$(echo "${GEOS[0]}" | grep -oP 'x\K\d*')"
+WIDTH="$(echo "${GEOS[0]}" | grep -oP '^\d*' | awk '{print($1*3)}')"
+GEO="${WIDTH}x${HEIGHT}+0+0"
+
+xwinwrap -fdt -ov -o 1 -g "$GEO" -- "$HOME"/.bin/play-wid WID "$@"
+
+# mpv --fullscreen --on-all-workspaces \
+#   --no-stop-screensaver \
+#   --no-config \
+#   --loop-file  --no-osc --no-osd-bar -mute -wid WID \
+#   --background="#000000" \
+#   "$1"\
+#   --external-file="$1"\
+#   --external-file="$1"\
+#   --external-file="$1"\
+#   --lavfi-complex='[vid1] [vid2] hstack [t1]; [t1] [vid3] hstack [vo]' \
+
+# mpv <video1> --external-file=<video2> --external-file=<video3> --external-file=<video4> --lavfi-complex='[vid1] [vid2] hstack [t1] ; [vid3] [vid4] hstack [t2] ; [t1] [t2] vstack [vo]'

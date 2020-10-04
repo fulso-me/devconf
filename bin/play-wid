@@ -1,0 +1,17 @@
+#!/bin/bash
+
+echo "$1" "$2" "${@:3}"
+
+xprop -f _NET_WM_NAME 8s -set _NET_WM_NAME "xwinwrap" -id "$1"
+
+mpv --fullscreen --on-all-workspaces \
+  --no-stop-screensaver \
+  --no-config \
+  --osd-fractions \
+  --loop-file  --no-osc --no-osd-bar -mute -wid "$1" \
+  --background="#000000" \
+  "$2"\
+  --external-file="$2"\
+  --external-file="$2"\
+  --external-file="$2"\
+  --lavfi-complex='[vid1] [vid2] hstack [t1]; [t1] [vid3] hstack [vo]' ${@:3} \

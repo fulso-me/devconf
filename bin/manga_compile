@@ -1,0 +1,68 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+  printf "Give the volume number to compile.\nFolders should be formatted \`v24 c273.cbr\`:\n\n"
+  printf "$ manga_compile 25\n\n"
+  printf "Manually make sure all the files are ones you want to keep\nThen archive with cbz:\n\n"
+  printf "$ manga_compile 25 cbz\n\n"
+  printf "All actions should be non-destructive on non-generated files.\n\n"
+
+  exit 1
+fi
+
+VOL="$1"
+
+# Pull pages
+if [ -z "$2" ]; then
+
+  mkdir -p "${VOL}"
+
+  for i in v"${VOL}"\ *
+  do
+    SUB="${i%%.*}"
+    CHAPTER="${SUB##*c}"
+
+    mkdir -p "${SUB}"
+    7z x -y -o"${SUB}" "$i"
+
+    cd "$SUB" || exit
+
+    # Grab all files from subfolders and delete the folders
+    find . -type f -exec mv {} . \;
+    find . -type d -exec rmdir {} \;
+
+    # Rename the pages
+    PAGE=1
+    for j in *
+    do
+      EXT="${j#*.}"
+      mv "$j" c"${CHAPTER}"p"$(printf "%03d" ${PAGE})"."${EXT}"
+      
+      PAGE=$((PAGE+1))
+    done
+
+    find . -type f -exec mv {} ../"$VOL" \;
+    rm -rf *
+    cd .. || exit
+    rmdir "$SUB"
+  done
+
+  exit 0
+fi
+
+if [ "$2" == "cbz" ]; then
+  echo "cbz"
+  cd "${VOL}" || exit
+
+  7z a -tzip v"${VOL}".cbz *
+
+  mv v"${VOL}".cbz ..
+  rm -rf *
+  cd .. || exit
+  rmdir "${VOL}"
+
+  exit 0
+fi
+
+echo "Please choose cbz"
+exit 1

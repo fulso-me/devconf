@@ -1,0 +1,109 @@
+#!/bin/bash
+
+if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ] || [ -z "$4" ]; then
+  echo "Usage:"
+  echo "ffsnip vid time1 time2 outvid"
+  exit 0
+fi
+
+PAD_TIME() {
+  OUTTIMEa=()
+
+  MICRO="$(echo "$1" | grep -oP '\.\K\d*' | awk '{printf("%02d", $1)}' | sed -E -e 's/ \K0+([0-9])/\1/')"
+  TIME=($(printf '%s' "$1" | grep -oP '[\d:]*(?=\.\d*)?' | head -n 1 | sed -e 's/:/ /g' | sed -E -e 's/ \K0+([0-9])/\1/'))
+  TIME_LEN=${#TIME[@]}
+
+  if [ "$MICRO" == "" ]; then
+    MICRO="00"
+  fi
+
+  # declare -p TIME
+
+  case $TIME_LEN in
+    1)
+      OUTTIMEa[0]="00"
+      OUTTIMEa[1]="00"
+      OUTTIMEa[2]="${TIME[0]}"
+      OUTTIMEa[3]="${MICRO}"
+      ;;
+    2)
+      OUTTIMEa[0]="00"
+      OUTTIMEa[1]="${TIME[0]}"
+      OUTTIMEa[2]="${TIME[1]}"
+      OUTTIMEa[3]="${MICRO}"
+      ;;
+    3)
+      OUTTIMEa[0]="${TIME[0]}"
+      OUTTIMEa[1]="${TIME[1]}"
+      OUTTIMEa[2]="${TIME[2]}"
+      OUTTIMEa[3]="${MICRO}"
+      ;;
+    *)
+      echo ERROR
+      exit 1
+      ;;
+  esac
+
+  # declare -p OUTTIMEa
+  printf '%02d:%02d:%02d.%03d' "${OUTTIMEa[0]}" "${OUTTIMEa[1]}" "${OUTTIMEa[2]}" "${OUTTIMEa[3]}"
+}
+
+F_TIME_CONVERT() {
+  # expects times in h:m:s.ms format
+  # break the timestamp in to args
+  # echo $1 $2 | sed -e 's/:/ /g' -e 's/\./ /g' | \
+  # [1000 la + 1r]sz -- macro, if there's a need for a carry; minuses back from whatever our max is (1000|60|24) and throws a 1 on the stack behind our current number to be carried
+  # -sa -- take the difference of our stamp units
+  # lbr-sb -- carry, throw empty stack error if there's no carry bit; TODO find a good way to not throw errors
+  # lb0>y -- if negative, roll over our max and add a carry bit from our macro
+  # lb0<blb0=b -- if nonnegative just use our difference
+  # sb -- overwrite with new value
+  # awk '{print $5,$1,$6,$2,$7,$3,$8,$4" [1000 la + 1r]sz [60 lb + 1r]sy [60 lc +]sx [24 ld +]sw -sa -sb -sc -sd la0>zla0<asa lbr-sblb0>ylb0<blb0=bsb lcr-sclc0>xlc0<clc0=csc ldr-sdld0>wld0<dld0=dsd ldplcplbplap"}' | \
+  # dc and recombine to a timestamp
+  # dc | xargs echo | awk '{print $1":"$2":"$3"."$4}'
+
+  TIME1=($(printf '%s' "$1" | grep -oP '[\d:]*\.\d*' | head -n 1 | sed -e 's/:/ /g' -e 's/\./ /g' | sed -E -e 's/ \K0+([0-9])/\1/'))
+  TIME2=($(printf '%s' "$2" | grep -oP '[\d:]*\.\d*' | head -n 1 | sed -e 's/:/ /g' -e 's/\./ /g' | sed -E -e 's/ \K0+([0-9])/\1/'))
+  DIFF=()
+
+  CARRY=0
+  DIFF[3]=$(expr "${TIME2[3]}" - "${TIME1[3]}" - "$CARRY")
+  if [ "${DIFF[3]}" -lt 0 ]; then
+    CARRY=1
+    DIFF[3]=$(expr 1000 + "${DIFF[3]}")
+  else
+    CARRY=0
+  fi
+  DIFF[2]=$(expr "${TIME2[2]}" - "${TIME1[2]}" - "$CARRY")
+  if [ "${DIFF[2]}" -lt 0 ]; then
+    CARRY=1
+    DIFF[2]=$(expr 60 + "${DIFF[2]}")
+  else
+    CARRY=0
+  fi
+  DIFF[1]=$(expr "${TIME2[1]}" - "${TIME1[1]}" - "$CARRY")
+  if [ "${DIFF[1]}" -lt 0 ]; then
+    CARRY=1
+    DIFF[1]=$(expr 60 + "${DIFF[1]}")
+  else
+    CARRY=0
+  fi
+  DIFF[0]=$(expr "${TIME2[0]}" - "${TIME1[0]}" - "$CARRY")
+  if [ "${DIFF[0]}" -lt 0 ]; then
+    CARRY=1
+    DIFF[0]=$(expr 24 + "${DIFF[0]}")
+  else
+    CARRY=0
+  fi
+
+  printf '%02d:%02d:%02d.%03d' "${DIFF[0]}" "${DIFF[1]}" "${DIFF[2]}" "${DIFF[3]}"
+}
+
+TIME_a="$(PAD_TIME "$2")"
+printf '%s\n' "$TIME_a"
+TIME_b="$(PAD_TIME "$3")"
+printf '%s\n' "$TIME_b"
+TIME_OFFSET="$(F_TIME_CONVERT "$TIME_a" "$TIME_b")"
+printf '%s\n' "$TIME_OFFSET"
+
+ffmpeg -i "$1" -ss "$TIME_a" -t "$TIME_OFFSET" "$4"

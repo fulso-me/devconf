@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+  echo "${0} video.mkv 1:25 4:30 ..."
+  exit 0;
+fi
+
+play-background "$1" --start="$2" --ab-loop-a="$2" --ab-loop-b="$3" ${@:4}
