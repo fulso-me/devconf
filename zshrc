@@ -65,7 +65,7 @@ setopt no_complete_aliases
 alias arch_update="yay -Syyuu --sudoloop"
 arch_list_pkgs() {yay -Qi | awk '/^Name/{name=$3} /^Installed Size/{print $4$5, name}' | sort -h}
 
-alias docker-clean-dangling="docker rmi $(docker images -f "dangling=true" -q)"
+docker-clean-dangling() {docker rmi $(docker images -f "dangling=true" -q)}
 
 alias rtorrent2="rtorrent -n -o import=/home/lorx/.rtorrent2.rc"
 alias rtorrentbaka="rtorrent -n -o import=/home/lorx/.rtorrentbaka.rc"
