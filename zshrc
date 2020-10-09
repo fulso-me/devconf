@@ -242,7 +242,7 @@ bindkey "^X^E" edit-command-line
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
-source /home/lorx/.config/broot/launcher/bash/br
+# source /home/lorx/.config/broot/launcher/bash/br
 eval "$(direnv hook zsh)"
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
