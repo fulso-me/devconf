@@ -43,7 +43,7 @@ Plug 'skywind3000/gutentags_plus'
 Plug 'mbbill/undotree'
 " Plug 'vim-scripts/auto-pairs-gentle'
 
-Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf', { 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
 
 Plug 'tpope/vim-surround'
