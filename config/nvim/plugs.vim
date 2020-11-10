@@ -25,6 +25,8 @@ Plug 'neoclide/coc.nvim', {'branch': 'release', 'do': ':CocInstall -sync
   \ coc-yaml
   \'}
 
+Plug 'puremourning/vimspector'
+
 Plug 'neovimhaskell/haskell-vim', { 'for': 'haskell' }
 Plug 'donRaphaco/neotex', { 'for': 'tex' }
 Plug 'google/vim-jsonnet', { 'for': 'jsonnet' }
@@ -41,7 +43,7 @@ Plug 'skywind3000/gutentags_plus'
 Plug 'mbbill/undotree'
 " Plug 'vim-scripts/auto-pairs-gentle'
 
-Plug 'junegunn/fzf', { 'do': './install --all' }
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 
 Plug 'tpope/vim-surround'

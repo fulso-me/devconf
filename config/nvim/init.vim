@@ -3,6 +3,7 @@
 let g:vim_home = get(g:, 'vim_home', expand('~/.config/nvim/'))
 exec 'source' g:vim_home.'plugs.vim'
 
+
 "}}}
 
 " Basics {{{
