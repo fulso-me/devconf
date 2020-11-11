@@ -11,11 +11,10 @@ function dec_count() {
 function read_count() {
   cat "${COUNT}"
 }
-
-if [ "$1" == "ls" ]; then
-  docker images | docker images | awk '/^fulsome\/devenv/ {print $2}'
-  exit 0
-fi
+function kill_current() {
+  docker container rm "${NAME}" -f
+  rm "${COUNT}"
+}
 
 if [ -z "$1" ]; then
   if [ -n "${DEVENVTAG}" ]; then
@@ -37,12 +36,20 @@ NAME="devenv_$(basename "${DIR}")"
 TMP="${HOME}/.devenv/.tmp_${NAME}"
 COUNT="${HOME}/.devenv/${NAME}"
 
-mkdir -p ~/.devenv
-if [ ! -f "${COUNT}" ]; then
-  echo 0 > "${COUNT}"
+if [ "$1" == "ls" ]; then
+  docker images | docker images | awk '/^fulsome\/devenv/ {print $2}'
+  exit 0
 fi
 
+if [ "$1" == "kill" ]; then
+  kill_current
+  exit 0
+fi
+
+mkdir -p ~/.devenv
+
 if [ "$(docker container inspect "${NAME}" 2> /dev/null)" == "[]" ]; then
+  echo 0 > "${COUNT}"
   inc_count
   echo No instances, starting a new container.
   docker run -it --name "${NAME}" --network="host" --hostname="devenv:${IMG}" -v "${DIR}:${DIR}" -v /var/run/docker.sock:/var/run/docker.sock -v "${HOME}/.ssh:/_ssh" -v "${HOME}/.kube:/_kube" -v "${HOME}/.config/doctl:/_doctl" -v "${HOME}/.local/share/direnv:/_direnv" -v "${HOME}/.vim-tmp:/_vimtmp" fulsome/devenv:"$IMG" "$(id -un)" "$(id -u)" "$(id -gn)" "$(id -g)" "${DIR}" "$(getent group docker | cut -d: -f3)"
@@ -51,13 +58,13 @@ if [ "$(docker container inspect "${NAME}" 2> /dev/null)" == "[]" ]; then
 else
   inc_count
   echo Starting instance: "$(read_count)".
-  docker exec -it -u "$(id -un)" "${NAME}" /bin/zsh -i -c "cd ${DIR} && tmux"
+  docker exec -it -u "$(id -un)" "${NAME}" /bin/zsh -i -c 'cd '"${DIR}"' && tmux new-session -t 0 && tmux kill-session -t "$(tmux list-sessions | grep "group 0)$" | grep -o "^[^:]*")"'
   dec_count
   echo "$(read_count)" Instances remaining.
 fi
 
 if [ "$(read_count)" == "0" ]; then
   echo No instances remaining, stopping container.
-  docker container rm "${NAME}" -f
+  kill_current
 fi
 # docker container rm "${NAME}"
